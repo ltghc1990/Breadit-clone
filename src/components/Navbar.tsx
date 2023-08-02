@@ -2,7 +2,10 @@ import Link from "next/link";
 import React from "react";
 import Icons from "./Icons";
 import { buttonVariants } from "./ui/Button";
-const Navbar = () => {
+import { getAuthSession } from "@/lib/auth";
+import UserAccountNav from "./UserAccountNav";
+const Navbar = async () => {
+  const session = await getAuthSession();
   return (
     // interesting inset-x-0 allows the div to take up the entire space of the max-w-7xl even tho theres nothing inside the div
     <div className="fixed inset-x-0 top-0 py-2 border-b bg-zinc-100 h-fit border-zinc-300">
@@ -16,9 +19,14 @@ const Navbar = () => {
         {/* scroll bar */}
 
         {/* the button variants gives us all the button classesnames without the other button props? */}
-        <Link href={"/sign-in"} className={buttonVariants()}>
-          Sign In
-        </Link>
+
+        {session?.user ? (
+          <UserAccountNav user={session.user} />
+        ) : (
+          <Link href={"/sign-in"} className={buttonVariants()}>
+            Sign In
+          </Link>
+        )}
       </div>
     </div>
   );
