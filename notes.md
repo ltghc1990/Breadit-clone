@@ -1,0 +1,1 @@
+- the close modal component uses router.back(). because of this, the modal wont actually close when the user constantly switches between the sign-in/ sign-up

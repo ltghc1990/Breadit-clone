@@ -1,10 +1,11 @@
 import { buttonVariants } from "@/components/ui/Button";
-import SignIn from "@/components/SignIn";
+
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
 import { FC } from "react";
 import { ChevronLeft } from "lucide-react";
+import SignUp from "@/components/SignUp";
 
 const page: FC = () => {
   return (
@@ -20,7 +21,7 @@ const page: FC = () => {
           <ChevronLeft className="w-4 h-4 mr-2 " />
           Home
         </Link>
-        <SignIn />
+        <SignUp />
       </div>
     </div>
   );
