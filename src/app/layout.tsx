@@ -31,9 +31,7 @@ export default function RootLayout({
         {/* @ts-expect-error server component */}
         <Navbar />
         {authModal}
-        <div className="container h-full pt-12 border border-blue-600">
-          {children}
-        </div>
+        <div className="container h-full pt-12 ">{children}</div>
         <Toaster />
       </body>
     </html>
