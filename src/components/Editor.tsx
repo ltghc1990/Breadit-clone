@@ -1,27 +1,33 @@
 "use client";
-import React, { FC, useCallback, useEffect, useRef, useState } from "react";
-import TextareaAutoSize from "react-textarea-autosize";
 
-import { useForm } from "react-hook-form";
-import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
+import EditorJS from "@editorjs/editorjs";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type EditorJS from "@editorjs/editorjs";
-import { uploadFiles } from "@/lib/uploadthing";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import TextareaAutosize from "react-textarea-autosize";
+import { z } from "zod";
+
 import { toast } from "@/hooks/use-toast";
+import { uploadFiles } from "@/lib/uploadthing";
+import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { usePathname, useRouter } from "next/navigation";
 
-type EditorProps = {
+import "@/styles/editor.css";
+
+type FormData = z.infer<typeof PostValidator>;
+
+interface EditorProps {
   subredditId: string;
-};
+}
 
-const Editor: FC<EditorProps> = ({ subredditId }) => {
+export const Editor: React.FC<EditorProps> = ({ subredditId }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<PostCreationRequest>({
+  } = useForm<FormData>({
     resolver: zodResolver(PostValidator),
     defaultValues: {
       subredditId,
@@ -29,19 +35,48 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
       content: null,
     },
   });
-
   const ref = useRef<EditorJS>();
-  const [isMounted, setIsMounted] = useState<Boolean>(false);
   const _titleRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
-  const pathName = usePathname();
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const pathname = usePathname();
 
-  const initializedEditor = useCallback(async () => {
+  const { mutate: createPost } = useMutation({
+    mutationFn: async ({
+      title,
+      content,
+      subredditId,
+    }: PostCreationRequest) => {
+      const payload: PostCreationRequest = { title, content, subredditId };
+      const { data } = await axios.post("/api/subreddit/post/create", payload);
+      return data;
+    },
+    onError: () => {
+      return toast({
+        title: "Something went wrong.",
+        description: "Your post was not published. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      // turn pathname /r/mycommunity/submit into /r/mycommunity
+      const newPathname = pathname.split("/").slice(0, -1).join("/");
+      router.push(newPathname);
+
+      router.refresh();
+
+      return toast({
+        description: "Your post has been published.",
+      });
+    },
+  });
+
+  const initializeEditor = useCallback(async () => {
     const EditorJS = (await import("@editorjs/editorjs")).default;
     const Header = (await import("@editorjs/header")).default;
     const Embed = (await import("@editorjs/embed")).default;
-    const List = (await import("@editorjs/list")).default;
     const Table = (await import("@editorjs/table")).default;
+    const List = (await import("@editorjs/list")).default;
     const Code = (await import("@editorjs/code")).default;
     const LinkTool = (await import("@editorjs/link")).default;
     const InlineCode = (await import("@editorjs/inline-code")).default;
@@ -49,19 +84,15 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
 
     if (!ref.current) {
       const editor = new EditorJS({
-        // editor needs a element to mount to, so create a div with an id of editor
         holder: "editor",
         onReady() {
           ref.current = editor;
         },
         placeholder: "Type here to write your post...",
         inlineToolbar: true,
-        data: {
-          blocks: [],
-        },
+        data: { blocks: [] },
         tools: {
           header: Header,
-          // editorjs needs the endpoint in order to properly display metadata
           linkTool: {
             class: LinkTool,
             config: {
@@ -73,6 +104,7 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
             config: {
               uploader: {
                 async uploadByFile(file: File) {
+                  // upload to uploadthing
                   const [res] = await uploadFiles([file], "imageUploader");
 
                   return {
@@ -85,7 +117,7 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
               },
             },
           },
-          List: List,
+          list: List,
           code: Code,
           inlineCode: InlineCode,
           table: Table,
@@ -96,16 +128,11 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsMounted(true);
-    }
-  }, []);
-
-  useEffect(() => {
     if (Object.keys(errors).length) {
       for (const [_key, value] of Object.entries(errors)) {
+        value;
         toast({
-          title: "something went wrong",
+          title: "Something went wrong.",
           description: (value as { message: string }).message,
           variant: "destructive",
         });
@@ -114,8 +141,18 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
   }, [errors]);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMounted(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const init = async () => {
-      await initializedEditor();
+      await initializeEditor();
+
+      setTimeout(() => {
+        _titleRef?.current?.focus();
+      }, 0);
     };
 
     if (isMounted) {
@@ -126,45 +163,9 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
         ref.current = undefined;
       };
     }
+  }, [isMounted, initializeEditor]);
 
-    setTimeout(() => {
-      _titleRef.current?.focus();
-    }, 0);
-  }, [isMounted, initializedEditor]);
-
-  const { mutate: createPost } = useMutation({
-    mutationFn: async ({
-      title,
-      content,
-      subredditId,
-    }: PostCreationRequest) => {
-      const payload: PostCreationRequest = {
-        subredditId,
-        title,
-        content,
-      };
-      const { data } = await axios.post("/api/subreddit/post/create", payload);
-      return data;
-    },
-    onError: () => {
-      return toast({
-        title: "Something went wrong",
-        description: "Your post was not published, please try again later.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: () => {
-      const newPathname = pathName.split("/").slice(0, -1).join("/");
-      router.push(newPathname);
-
-      router.refresh();
-      return toast({
-        description: "Your post has been published.",
-      });
-    },
-  });
-
-  async function onSubmit(data: PostCreationRequest) {
+  async function onSubmit(data: FormData) {
     const blocks = await ref.current?.save();
 
     const payload: PostCreationRequest = {
@@ -176,21 +177,23 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
     createPost(payload);
   }
 
-  // share ref, instead of overriding between 2 elements
+  if (!isMounted) {
+    return null;
+  }
+
   const { ref: titleRef, ...rest } = register("title");
 
   return (
-    <div className="w-full p-4 rounded-lg bg-zinc-50 boder-zince-200 ">
+    <div className="w-full p-4 border rounded-lg bg-zinc-50 border-zinc-200">
       <form
         id="subreddit-post-form"
         className="w-fit"
-        onSubmit={() => handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <div className="prose prose-stone dark:prose-invert">
-          <TextareaAutoSize
+          <TextareaAutosize
             ref={(e) => {
               titleRef(e);
-
               // @ts-ignore
               _titleRef.current = e;
             }}
@@ -199,10 +202,15 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
             className="w-full overflow-hidden text-5xl font-bold bg-transparent appearance-none resize-none focus:outline-none"
           />
           <div id="editor" className="min-h-[500px]" />
+          <p className="text-sm text-gray-500">
+            Use{" "}
+            <kbd className="px-1 text-xs uppercase border rounded-md bg-muted">
+              Tab
+            </kbd>{" "}
+            to open the command menu.
+          </p>
         </div>
       </form>
     </div>
   );
 };
-
-export default Editor;
