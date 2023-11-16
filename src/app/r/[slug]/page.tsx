@@ -25,7 +25,7 @@ const Page = async ({ params }: PageProps) => {
     include: {
       posts: {
         include: {
-          auther: true,
+          author: true,
           votes: true,
           comments: true,
           subreddit: true,

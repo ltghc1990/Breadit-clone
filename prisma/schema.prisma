@@ -72,7 +72,7 @@ model Vote {
 model Subreddit {
   id        String   @id @default(cuid())
   name      String   @unique
-  createAt  DateTime @default(now())
+  createdAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
   posts     Post[]
 
@@ -96,12 +96,12 @@ model Post {
   id          String    @id @default(cuid())
   title       String
   content     Json?
-  createAt    DateTime  @default(now())
+  createdAt    DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   subreddit   Subreddit @relation(fields: [subredditId], references: [id])
   subredditId String
 
-  auther   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id])
   authorId String
 
   comments Comment[]

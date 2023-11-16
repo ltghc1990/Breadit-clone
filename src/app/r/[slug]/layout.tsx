@@ -21,7 +21,7 @@ const Layout = async ({
     include: {
       posts: {
         include: {
-          auther: true,
+          author: true,
           votes: true,
         },
       },
@@ -69,8 +69,8 @@ const Layout = async ({
               <div className="flex justify-between py-3 gap-x-4">
                 <dt className="text-gray-500">Created</dt>
                 <dd className="text-gray-700">
-                  <time dateTime={subreddit.createAt.toDateString()}>
-                    {format(subreddit.createAt, "MMMM d, yyyy")}
+                  <time dateTime={subreddit.createdAt.toDateString()}>
+                    {format(subreddit.createdAt, "MMMM d, yyyy")}
                   </time>
                 </dd>
               </div>

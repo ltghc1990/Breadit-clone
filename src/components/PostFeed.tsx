@@ -1,6 +1,6 @@
 "use client";
 import { ExtendedPost } from "@/types/db";
-import React, { useRef } from "react";
+import React, { FC, useRef } from "react";
 import { useIntersection } from "@mantine/hooks";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { INFINTE_SCROLLING_PAGINATION_RESULTS } from "@/config";
@@ -8,12 +8,12 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import Post from "./Post";
 
-type Props = {
+type PostProps = {
   initialPosts: ExtendedPost[];
   subredditName?: string;
 };
 
-const PostFeed = ({ initialPosts, subredditName }) => {
+const PostFeed: FC<PostProps> = ({ initialPosts, subredditName }) => {
   const lastPostRef = useRef<HTMLElement>(null);
 
   const { ref, entry } = useIntersection({
@@ -58,11 +58,21 @@ const PostFeed = ({ initialPosts, subredditName }) => {
         if (index === posts.length - 1) {
           return (
             <li key={post.id} ref={ref}>
-              <Post />
+              <Post
+                commentAmt={post.comments.length}
+                post={post}
+                subredditName={post.subreddit.name}
+              />
             </li>
           );
         } else {
-          return <Post />;
+          return (
+            <Post
+              commentAmt={post.comments.length}
+              post={post}
+              subredditName={post.subreddit.name}
+            />
+          );
         }
       })}
     </ul>
