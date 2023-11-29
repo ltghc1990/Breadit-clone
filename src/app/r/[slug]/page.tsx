@@ -30,6 +30,9 @@ const Page = async ({ params }: PageProps) => {
           comments: true,
           subreddit: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
         take: INFINTE_SCROLLING_PAGINATION_RESULTS,
       },
     },
