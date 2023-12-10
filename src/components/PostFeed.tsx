@@ -61,7 +61,7 @@ const PostFeed: FC<PostProps> = ({ initialPosts, subredditName }) => {
           (vote) => vote.userId === session?.user.id
         );
 
-        // if last post
+        // if last post add a ref
         if (index === posts.length - 1) {
           return (
             <li key={post.id} ref={ref}>
