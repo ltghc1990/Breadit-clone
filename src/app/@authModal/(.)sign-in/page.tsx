@@ -2,7 +2,7 @@ import CloseModal from "@/components/CloseModal";
 import SignIn from "@/components/SignIn";
 import React from "react";
 
-// interfects and renders out the sign-in modal
+// intersects and renders out the sign-in modal
 
 const page = () => {
   return (

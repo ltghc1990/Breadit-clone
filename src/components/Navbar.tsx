@@ -4,6 +4,7 @@ import Icons from "./Icons";
 import { buttonVariants } from "./ui/Button";
 import { getAuthSession } from "@/lib/auth";
 import UserAccountNav from "./UserAccountNav";
+import Searchbar from "./Searchbar";
 const Navbar = async () => {
   const session = await getAuthSession();
   return (
@@ -16,7 +17,8 @@ const Navbar = async () => {
             Breadit
           </p>
         </Link>
-        {/* scroll bar */}
+
+        <Searchbar />
 
         {/* the button variants gives us all the button classesnames without the other button props? */}
 
