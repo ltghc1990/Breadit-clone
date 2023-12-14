@@ -9,7 +9,7 @@ const Navbar = async () => {
   const session = await getAuthSession();
   return (
     // interesting inset-x-0 allows the div to take up the entire space of the max-w-7xl even tho theres nothing inside the div
-    <div className="fixed inset-x-0 top-0 py-2 border-b bg-zinc-100 h-fit border-zinc-300">
+    <div className="fixed inset-x-0 top-0 z-50 py-2 border-b bg-zinc-100 h-fit border-zinc-300">
       <div className="container flex items-center justify-between h-full gap-2 max-w-7xl">
         <Link href="/" className="flex items-center gap-2">
           <Icons.logo className="w-8 h-8 sm:h-6 sm:w-6" />
