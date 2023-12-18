@@ -11,7 +11,7 @@ type Props = {
   subredditName: string;
   post: Post & {
     author: User;
-    votes: Vote;
+    votes: Vote[];
   };
   commentAmt: number;
   votesAmt: number;
