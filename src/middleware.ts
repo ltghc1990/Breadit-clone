@@ -13,5 +13,5 @@ export async function middleware(req: NextRequest) {
 
 // the function will run when it matches these paths
 export const config = {
-  matcher: ["/r/:path*/submit", "r/create"],
+  matcher: ["/r/:path*/submit", "/r/create"],
 };
