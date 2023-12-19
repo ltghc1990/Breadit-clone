@@ -1,5 +1,6 @@
 import { getToken } from "next-auth/jwt";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 // this function runs on the edge, it'll happen before it goes to the server
 export async function middleware(req: NextRequest) {
