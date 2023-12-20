@@ -1,3 +1,4 @@
+"use client";
 import { usePathname } from "next/navigation";
 import { buttonVariants } from "./ui/Button";
 import { ChevronLeft } from "lucide-react";
