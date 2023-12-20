@@ -24,6 +24,6 @@ const getSubRedditPath = (pathname: string) => {
   const splitPath = pathname.split("/");
 
   if (pathname.length === 3) return "/";
-  else if (splitPath.length > 3) return `${splitPath[1]}/${splitPath[2]}`;
+  else if (splitPath.length > 3) return `/${splitPath[1]}/${splitPath[2]}`;
   else return "/";
 };
